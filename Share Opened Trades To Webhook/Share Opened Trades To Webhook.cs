@@ -14,6 +14,7 @@ using System.Net;
 using cAlgo.API;
 using System.Windows.Forms;
 using cAlgo.API.Internals;
+using System.Text.RegularExpressions;
 
 namespace cAlgo
 {
@@ -70,7 +71,8 @@ namespace cAlgo
             for (int i = MyBars.ClosePrices.Count - 1; i >= 0; i--)
             {
 
-                if (MyTime == MyBars.OpenTimes[i]) return i;
+                if (MyTime == MyBars.OpenTimes[i])
+                    return i;
 
             }
 
@@ -247,7 +249,7 @@ namespace cAlgo
         /// <summary>
         /// La versione del prodotto, progressivo, utilie per controllare gli aggiornamenti se viene reso disponibile sul sito ctrader.guru
         /// </summary>
-        public const string VERSION = "1.0.3";
+        public const string VERSION = "1.0.4";
 
         #endregion
 
@@ -347,15 +349,26 @@ namespace cAlgo
 
             try
             {
+                // --> Mi servono i permessi di sicurezza per il dominio, compreso i redirect
+                Uri myuri = new Uri(Webhook);
+
+                string pattern = string.Format("{0}://{1}/.*", myuri.Scheme, myuri.Host);
+
+                // --> Autorizzo tutte le pagine di questo dominio
+                Regex urlRegEx = new Regex(@pattern);
+                WebPermission p = new WebPermission(NetworkAccess.Connect, urlRegEx);
+                p.Assert();
+
+                // --> Protocollo di sicurezza https://
+                ServicePointManager.SecurityProtocol = (SecurityProtocolType)192 | (SecurityProtocolType)768 | (SecurityProtocolType)3072;
 
                 using (WebClient wc = new WebClient())
                 {
                     wc.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
-                    string HtmlResult = wc.UploadString(Webhook, string.Format(PostParams, messageformat));
+                    string HtmlResult = wc.UploadString(myuri, string.Format(PostParams, messageformat));
                 }
 
-            }
-            catch (Exception exc)
+            } catch (Exception exc)
             {
 
                 MessageBox.Show(string.Format("{0}\r\nstopping cBots 'Share Opened Trades To Webhook' ...", exc.Message), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
