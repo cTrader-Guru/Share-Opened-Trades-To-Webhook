@@ -249,7 +249,7 @@ namespace cAlgo
         /// <summary>
         /// La versione del prodotto, progressivo, utilie per controllare gli aggiornamenti se viene reso disponibile sul sito ctrader.guru
         /// </summary>
-        public const string VERSION = "1.0.4";
+        public const string VERSION = "1.0.5";
 
         #endregion
 
@@ -264,7 +264,7 @@ namespace cAlgo
         [Parameter("Webhook", Group = "Params", DefaultValue = "https://api.telegram.org/bot[ YOUR TOKEN ]/sendMessage")]
         public string Webhook { get; set; }
 
-        [Parameter("Message", Group = "Params", DefaultValue = "#{0} opened {1} position at {2} for {3} lots")]
+        [Parameter("Message", Group = "Params", DefaultValue = "#{0} opened {1} position at {2} for {3} lots, stoploss {4} takeprofit {5}")]
         public string Message { get; set; }
 
         [Parameter("POST params", Group = "Params", DefaultValue = "chat_id=[ @CHATID ]&text={0}")]
@@ -345,7 +345,7 @@ namespace cAlgo
             if (OonlyThis && args.Position.SymbolName != SymbolName)
                 return;
 
-            string messageformat = string.Format(Message, args.Position.SymbolName, args.Position.TradeType, args.Position.EntryPrice, args.Position.Quantity);
+            string messageformat = string.Format(Message, args.Position.SymbolName, args.Position.TradeType, args.Position.EntryPrice, args.Position.Quantity, args.Position.StopLoss, args.Position.TakeProfit);
 
             try
             {
@@ -355,7 +355,7 @@ namespace cAlgo
                 string pattern = string.Format("{0}://{1}/.*", myuri.Scheme, myuri.Host);
 
                 // --> Autorizzo tutte le pagine di questo dominio
-                Regex urlRegEx = new Regex(@pattern);
+                Regex urlRegEx = new Regex(pattern);
                 WebPermission p = new WebPermission(NetworkAccess.Connect, urlRegEx);
                 p.Assert();
 
