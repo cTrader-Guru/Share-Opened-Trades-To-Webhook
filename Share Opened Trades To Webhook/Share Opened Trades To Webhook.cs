@@ -249,7 +249,7 @@ namespace cAlgo
         /// <summary>
         /// La versione del prodotto, progressivo, utilie per controllare gli aggiornamenti se viene reso disponibile sul sito ctrader.guru
         /// </summary>
-        public const string VERSION = "1.0.5";
+        public const string VERSION = "1.0.6";
 
         #endregion
 
@@ -345,7 +345,10 @@ namespace cAlgo
             if (OonlyThis && args.Position.SymbolName != SymbolName)
                 return;
 
-            string messageformat = string.Format(Message, args.Position.SymbolName, args.Position.TradeType, args.Position.EntryPrice, args.Position.Quantity, args.Position.StopLoss, args.Position.TakeProfit);
+            double sl = (args.Position.StopLoss == null) ? 0 : (double)args.Position.StopLoss;
+            double tp = (args.Position.TakeProfit == null) ? 0 : (double)args.Position.TakeProfit;
+
+            string messageformat = string.Format(Message, args.Position.SymbolName, args.Position.TradeType, args.Position.EntryPrice, args.Position.Quantity, sl, tp);
 
             try
             {
